@@ -13,6 +13,7 @@
     <Description>Библиотека для парсинга внутрисистемного формата файлов 1С.</Description>
     <Company>Akpaev Evgeniy</Company>
     <RepositoryUrl>https://github.com/akpaevj/OneSTools.BracketsFile</RepositoryUrl>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
 </Project>
