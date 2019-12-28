@@ -2,13 +2,17 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Authors>Akpaev E.A.</Authors>
-    <Product>OneSTools</Product>
-    <Copyright>Akpaev E.A.</Copyright>
+    <Authors>Akpaev Evgeniy</Authors>
+    <Product>OneSTools.BracketsFile</Product>
+    <Copyright>Akpaev Evgeniy</Copyright>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>OneSTools.BracketsFile.pfx</AssemblyOriginatorKeyFile>
     <DelaySign>false</DelaySign>
     <UserSecretsId>bfd84778-24ce-4c5f-bbd9-bc0c255f5dd9</UserSecretsId>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Description>Библиотека для парсинга внутрисистемного формата файлов 1С.</Description>
+    <Company>Akpaev Evgeniy</Company>
+    <RepositoryUrl>https://github.com/akpaevj/OneSTools.BracketsFile</RepositoryUrl>
   </PropertyGroup>
 
 </Project>
