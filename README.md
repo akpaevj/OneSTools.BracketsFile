@@ -9,7 +9,7 @@
   Value2,
   {
     Value3,
-    "Text"
+    "TextValue"
   },
   Value5
 }.
