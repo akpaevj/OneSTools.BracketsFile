@@ -2,179 +2,89 @@
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
+using System.IO.Compression;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace OneSTools.BracketsFile
 {
     /// <summary>
     /// Represents methods for the parsing of the 1C "brackets file"
     /// </summary>
-    public class BracketsFileParser
+    public static class BracketsFileParser
     {
         /// <summary>
-        /// Parsed data
-        /// </summary>
-        public List<object> StructuredData { get; private set; }
-        /// <summary>
-        /// Returns a value of the property by the passed address
-        /// </summary>
-        /// <param name="node">The node for the searching</param>
-        /// <param name="address">Node address</param>
-        /// <returns></returns>
-        public static object GetNodeProperty(List<object> node, params int[] address)
-        {
-            object currentNode = node;
-
-            foreach (var addr in address)
-            {
-                currentNode = (currentNode as List<object>)[addr];
-            }
-
-            return currentNode;
-        }
-        /// <summary>
-        /// Returns a value of the property by the passed address
-        /// </summary>
-        /// <param name="address">Node address</param>
-        /// <returns></returns>
-        public object GetNodeProperty(params int[] address)
-        {
-            return GetNodeProperty(StructuredData, address);
-        }
-        /// <summary>
-        /// Returns a typed value of the property by the passed address
-        /// </summary>
-        /// <param name="node">The node for the searching</param>
-        /// <param name="address">Node address</param>
-        /// <returns></returns>
-        public static T GetNodeProperty<T>(List<object> node, params int[] address)
-        {
-            return (T)Convert.ChangeType(GetNodeProperty(node, address), typeof(T));
-        }
-        /// <summary>
-        /// Returns a typed value of the property by the passed address
-        /// </summary>
-        /// <param name="address">Node address</param>
-        /// <returns></returns>
-        public T GetNodeProperty<T>(params int[] address)
-        {
-            return (T)Convert.ChangeType(GetNodeProperty(address), typeof(T));
-        }
-        /// <summary>
-        /// Searches the value and returns an its address
-        /// </summary>
-        /// <param name="value">Value for the searchng</param>
-        /// <returns></returns>
-        public int[] WhereIs(string value)
-        {
-            var address = new List<int>();
-
-            WhereIs(value, StructuredData, address);
-
-            if (address.Count > 0)
-            {
-                return address.ToArray();
-            }
-            else
-            {
-                return null;
-            }
-        }
-        private bool WhereIs(string value, List<object> node, List<int> address)
-        {
-            for (int x = 0; x < node.Count; x++)
-            {
-                var currentNode = node[x];
-
-                if (currentNode is List<object> n)
-                {
-                    address.Add(x);
-
-                    var res = WhereIs(value, n, address);
-
-                    if (res)
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        address.RemoveAt(address.Count - 1);
-                    }
-                }
-                else if (currentNode.ToString() == value)
-                {
-                    address.Add(x);
-
-                    return true;
-                }
-            }
-
-            return false;
-        }
-        /// <summary>
-        /// Parses the text and retuns an instance of the "BracketsFile" class
+        /// Parses the text and retuns an instance of the "BracketsFileNode" class
         /// </summary>
         /// <param name="text">The source text of the 1C "brackets file"</param>
         /// <returns></returns>
-        public static BracketsFileParser Parse(string text)
+        public static BracketsFileNode Parse(string text)
         {
-            var file = new BracketsFileParser();
+            var t = Regex.Replace(text, @"(\n|\r)", "");
 
-            StringBuilder s = new StringBuilder(Regex.Replace(text, @"(\n|\r)", ""));
-            file.StructuredData = ParseText(s, s.ToString().IndexOf('{'), s.ToString().Length - 1, true);
+            var root = new BracketsFileNode();
 
-            return file;
+            Parse(root, ref t, text.IndexOf('{') + 1, t.Length - 2);
+
+            return root;
         }
-        private static List<object> ParseText(StringBuilder text, int startIndex, int lastIndex, bool root)
+
+        private static void Parse(BracketsFileNode parentNode, ref string text, int currentIndex, int lastIndex)
         {
-            List<object> data = new List<object>();
+            var propNodeStartPosition = -1;
 
-            StringBuilder currentProperty = new StringBuilder();
-
-            for (int x = startIndex; x <= lastIndex; x++)
+            for (int i = currentIndex; i <= lastIndex; i++)
             {
-                var c = text[x];
+                char currentChar = text[i];
 
-                if (c == '{')
+                if (currentChar == '{')
                 {
-                    var blockLastIndex = GetBlockEndIndex(text, x);
+                    propNodeStartPosition = -1;
 
-                    if (root && data.Count == 0)
-                    {
-                        data = ParseText(text, x + 1, blockLastIndex - 1, false);
-                    }
-                    else
-                    {
-                        data.Add(ParseText(text, x + 1, blockLastIndex - 1, false));
-                    }
+                    var nodeEndIndex = GetNodeEndIndex(ref text, i);
 
-                    x = blockLastIndex + 1;
+                    var node = new BracketsFileNode();
+                    parentNode.Nodes.Add(node);
+
+                    Parse(node, ref text, i + 1, nodeEndIndex);
+
+                    i = nodeEndIndex;
                 }
-                else if (c == ',')
+                else if (currentChar == ',')
                 {
-                    if (currentProperty.Length > 0)
+                    if (propNodeStartPosition != -1)
                     {
-                        data.Add(currentProperty.ToString().Trim('"'));
+                        var t = text.Substring(propNodeStartPosition, i - propNodeStartPosition).Trim('"');
 
-                        currentProperty.Clear();
+                        var node = new BracketsFileNode(t);
+                        parentNode.Nodes.Add(node);
+
+                        propNodeStartPosition = -1;
                     }
                 }
                 else
                 {
-                    currentProperty.Append(c);
+                    if (propNodeStartPosition == -1)
+                        propNodeStartPosition = i;
                 }
             }
 
-            if (currentProperty.Length > 0) data.Add(currentProperty.ToString().Trim('"'));
-
-            return data;
+            if (propNodeStartPosition != -1)
+            {
+                var offset = text[lastIndex - propNodeStartPosition] == '}' ? 1 : 0;
+                var t = text.Substring(propNodeStartPosition, lastIndex - propNodeStartPosition - offset).Trim('"');
+                var node = new BracketsFileNode(t);
+                parentNode.Nodes.Add(node);
+            }
         }
+
         /// <summary>
         /// Returns the end index of the current block
         /// </summary>
-        /// <param name="text"></param>
+        /// <param name="parentNode"></param>
         /// <param name="startIndex"></param>
         /// <returns></returns>
-        private static int GetBlockEndIndex(StringBuilder text, int startIndex)
+        private static int GetNodeEndIndex(ref string text, int startIndex)
         {
             int endIndex = text.Length - startIndex - 1;
             int quotesAmount = 0;
@@ -185,24 +95,16 @@ namespace OneSTools.BracketsFile
                 var currentChar = text[x];
 
                 if (currentChar == '{')
-                {
                     bracketAmount += 1;
-                }
                 else if (currentChar == '}')
-                {
                     bracketAmount -= 1;
-                }
                 else if (currentChar == '"')
-                {
                     quotesAmount += 1;
-                }
 
                 endIndex = x;
 
                 if (bracketAmount == 0 && (quotesAmount % 2) == 0)
-                {
                     break;
-                }
             }
 
             return endIndex;
