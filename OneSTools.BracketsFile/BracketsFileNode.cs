@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace OneSTools.BracketsFile
 {
@@ -46,13 +47,17 @@ namespace OneSTools.BracketsFile
         {
             return int.Parse(node.Text);
         }
+        public static explicit operator Guid(BracketsFileNode node)
+        {
+            return Guid.Parse(node.Text);
+        }
 
         public override string ToString()
         {
             if (IsValueNode)
                 return Text;
-
-            return base.ToString();
+            else
+                return $"Count = {Nodes.Count}";
         }
     }
 }
