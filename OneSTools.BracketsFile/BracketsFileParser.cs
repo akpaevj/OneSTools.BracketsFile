@@ -72,9 +72,13 @@ namespace OneSTools.BracketsFile
             if (propNodeStartPosition != -1)
             {
                 var offset = text[lastIndex - propNodeStartPosition] == '}' ? 1 : 0;
-                var t = text.Substring(propNodeStartPosition, lastIndex - propNodeStartPosition - offset).Trim('"');
-                var node = new BracketsFileNode(t);
-                parentNode.Nodes.Add(node);
+                var count = lastIndex - propNodeStartPosition - offset;
+                if (count > 0)
+                {
+                    var t = text.Substring(propNodeStartPosition, lastIndex - propNodeStartPosition - offset).Trim('"');
+                    var node = new BracketsFileNode(t);
+                    parentNode.Nodes.Add(node);
+                }
             }
         }
 
