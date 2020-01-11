@@ -85,7 +85,7 @@ namespace OneSTools.BracketsFile
         /// <param name="startIndex"></param>
         /// <returns></returns>
         private static int GetNodeEndIndex(ref string text, int startIndex)
-        {
+        { 
             int endIndex = text.Length - startIndex - 1;
             int quotesAmount = 0;
             int bracketAmount = 0;
