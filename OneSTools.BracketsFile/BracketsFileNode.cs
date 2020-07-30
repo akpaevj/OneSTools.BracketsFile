@@ -1,13 +1,15 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace OneSTools.BracketsFile
 {
-    public class BracketsFileNode
+    public class BracketsFileNode : IEnumerable<BracketsFileNode>
     {
         public bool IsValueNode { get; private set; }
         public string Text { get; private set; }
         public List<BracketsFileNode> Nodes { get; private set; } = new List<BracketsFileNode>();
+        public int Count => Nodes.Count;
 
         public BracketsFileNode this[int index]
         {
@@ -51,6 +53,18 @@ namespace OneSTools.BracketsFile
         {
             return Guid.Parse(node.Text);
         }
+        public static explicit operator bool(BracketsFileNode node)
+        {
+            if (!node.IsValueNode)
+                throw new ArgumentException("The node doesn't present a value");
+
+            if ((string)node == "1")
+                return true;
+            else if ((string)node == "0")
+                return false;
+            else
+                throw new ArgumentException($"\"{node.Text}\" value can not be casted to boolean");
+        }
 
         public override string ToString()
         {
@@ -58,6 +72,16 @@ namespace OneSTools.BracketsFile
                 return Text;
             else
                 return $"Count = {Nodes.Count}";
+        }
+
+        public IEnumerator<BracketsFileNode> GetEnumerator()
+        {
+            return Nodes.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }
