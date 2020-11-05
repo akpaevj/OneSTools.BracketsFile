@@ -33,11 +33,34 @@ namespace OneSTools.BracketsFile
         {
             var propNodeStartPosition = -1;
 
+            bool stringValue = false;
+            int quotesCount = 0;
+
             for (int i = currentIndex; i <= lastIndex; i++)
             {
                 char currentChar = text[i];
+                char nextChar = text.Length > i + 1 ? text[i + 1] : '\0';
 
-                if (currentChar == '{')
+                if (currentChar == ',' && nextChar == '"' && !stringValue)
+                {
+                    stringValue = true;
+                    quotesCount = 0;
+
+                    propNodeStartPosition = i + 1;
+
+                    continue;
+                }
+
+                if (stringValue)
+                {
+                    if (currentChar == '"')
+                        quotesCount += 1;
+
+                    if ((quotesCount % 2) == 0 && nextChar == ',')
+                        stringValue = false;
+                }
+                
+                if (currentChar == '{' && !stringValue)
                 {
                     propNodeStartPosition = -1;
 
@@ -50,7 +73,7 @@ namespace OneSTools.BracketsFile
 
                     i = nodeEndIndex;
                 }
-                else if (currentChar == ',')
+                else if (currentChar == ',' && !stringValue)
                 {
                     if (propNodeStartPosition != -1)
                     {
@@ -85,7 +108,7 @@ namespace OneSTools.BracketsFile
         /// <summary>
         /// Returns the end index of the current block
         /// </summary>
-        /// <param name="parentNode"></param>
+        /// <param name="text"></param>
         /// <param name="startIndex"></param>
         /// <returns></returns>
         private static int GetNodeEndIndex(ref string text, int startIndex)
