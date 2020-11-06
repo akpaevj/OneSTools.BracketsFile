@@ -46,5 +46,54 @@ namespace OneSTools.BracketsFile.Tests
             Assert.False(parsedData[18].IsValueNode);
             Assert.Equal(0, (int)parsedData[18].Nodes[0]);
         }
+
+        [Fact]
+        public void ParseTest2()
+        {
+            // Arrange
+            var data = "{20201005085729,U,\n" +
+                "{0,0},75,2,5,15446,1,I,\"\",0,\n" +
+                "{\"P\",\n" +
+                "{2," +
+                "{\"S\",\"исрв\"}\n" +
+                "}\n" +
+                "},\"\",1,1,0,1137,0,\n" +
+                "{0}" +
+                "}";
+
+            // Act
+            var parsedData = BracketsFileParser.Parse(data);
+
+            // Assert
+            Assert.Equal(19, parsedData.Count);
+            Assert.Equal("20201005085729", (string)parsedData[0]);
+            Assert.Equal("U", (string)parsedData[1]);
+            Assert.False(parsedData[2].IsValueNode);
+            Assert.Equal("0", (string)parsedData[2].Nodes[0]);
+            Assert.Equal("0", (string)parsedData[2].Nodes[1]);
+            Assert.Equal(75, (int)parsedData[3]);
+            Assert.Equal(2, (int)parsedData[4]);
+            Assert.Equal(5, (int)parsedData[5]);
+            Assert.Equal(15446, (int)parsedData[6]);
+            Assert.Equal(1, (int)parsedData[7]);
+            Assert.Equal("I", (string)parsedData[8]);
+            Assert.Equal("", (string)parsedData[9]);
+            Assert.Equal(0, (int)parsedData[10]);
+            Assert.False(parsedData[11].IsValueNode);
+            Assert.Equal("P", (string)parsedData[11].Nodes[0]);
+            Assert.False(parsedData[11][1].IsValueNode);
+            Assert.Equal(2, (int)parsedData[11][1][0]);
+            Assert.False(parsedData[11][1][1].IsValueNode);
+            Assert.Equal("S", (string)parsedData[11][1][1][0]);
+            Assert.Equal("исрв", (string)parsedData[11][1][1][1]);
+            Assert.Equal("", (string)parsedData[12]);
+            Assert.Equal(1, (int)parsedData[13]);
+            Assert.Equal(1, (int)parsedData[14]);
+            Assert.Equal(0, (int)parsedData[15]);
+            Assert.Equal(1137, (int)parsedData[16]);
+            Assert.Equal(0, (int)parsedData[17]);
+            Assert.False(parsedData[18].IsValueNode);
+            Assert.Equal(0, (int)parsedData[18].Nodes[0]);
+        }
     }
 }

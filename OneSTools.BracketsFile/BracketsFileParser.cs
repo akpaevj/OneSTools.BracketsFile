@@ -142,7 +142,7 @@ namespace OneSTools.BracketsFile
                 if (currentChar == '"')
                     quotesAmount += 1;
 
-                if (quotesAmount != 0 && (quotesAmount % 2) == 0 && nextChar == ',')
+                if (quotesAmount != 0 && (quotesAmount % 2) == 0 && (nextChar == ',' || nextChar == '}'))
                     return i;
             }
 
