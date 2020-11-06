@@ -33,34 +33,12 @@ namespace OneSTools.BracketsFile
         {
             var propNodeStartPosition = -1;
 
-            bool stringValue = false;
-            int quotesCount = 0;
-
             for (int i = currentIndex; i <= lastIndex; i++)
             {
                 char currentChar = text[i];
                 char nextChar = text.Length > i + 1 ? text[i + 1] : '\0';
 
-                if (currentChar == ',' && nextChar == '"' && !stringValue)
-                {
-                    stringValue = true;
-                    quotesCount = 0;
-
-                    propNodeStartPosition = i + 1;
-
-                    continue;
-                }
-
-                if (stringValue)
-                {
-                    if (currentChar == '"')
-                        quotesCount += 1;
-
-                    if ((quotesCount % 2) == 0 && nextChar == ',')
-                        stringValue = false;
-                }
-                
-                if (currentChar == '{' && !stringValue)
+                if (currentChar == '{')
                 {
                     propNodeStartPosition = -1;
 
@@ -73,7 +51,7 @@ namespace OneSTools.BracketsFile
 
                     i = nodeEndIndex;
                 }
-                else if (currentChar == ',' && !stringValue)
+                else if (currentChar == ',')
                 {
                     if (propNodeStartPosition != -1)
                     {
@@ -83,6 +61,20 @@ namespace OneSTools.BracketsFile
                         parentNode.Nodes.Add(node);
 
                         propNodeStartPosition = -1;
+                    }
+
+                    // Read text value (string between ," and ",)
+                    if (currentChar == ',' && nextChar == '"' && propNodeStartPosition == -1)
+                    {
+                        var valueEndIndex = GetTextValueEndIndex(ref text, i);
+                        var textValue = text.Substring(i + 1, valueEndIndex - i).Trim('"');
+
+                        var node = new BracketsFileNode(textValue);
+                        parentNode.Nodes.Add(node);
+
+                        propNodeStartPosition = -1;
+
+                        i = valueEndIndex;
                     }
                 }
                 else
@@ -132,6 +124,26 @@ namespace OneSTools.BracketsFile
 
                 if (bracketAmount == 0 && (quotesAmount % 2) == 0)
                     break;
+            }
+
+            return endIndex;
+        }
+
+        private static int GetTextValueEndIndex(ref string text, int startIndex)
+        {
+            var quotesAmount = 0;
+            var endIndex = -1;
+
+            for (int i = startIndex; i < text.Length; i++)
+            {
+                var currentChar = text[i];
+                var nextChar = text.Length > i + 1 ? text[i + 1] : '\0';
+
+                if (currentChar == '"')
+                    quotesAmount += 1;
+
+                if (quotesAmount != 0 && (quotesAmount % 2) == 0 && nextChar == ',')
+                    return i;
             }
 
             return endIndex;
