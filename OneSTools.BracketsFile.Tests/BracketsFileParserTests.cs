@@ -95,5 +95,22 @@ namespace OneSTools.BracketsFile.Tests
             Assert.False(parsedData[18].IsValueNode);
             Assert.Equal(0, (int)parsedData[18].Nodes[0]);
         }
+
+        [Fact]
+        public void ParseTest3()
+        {
+            // Arrange
+            var data = "{1,071523a4-516f-4fce-ba4b-0d11ab7a1893,\"\",1}";
+
+            // Act
+            var parsedData = BracketsFileParser.Parse(data);
+
+            // Assert
+            Assert.Equal(4, parsedData.Count);
+            Assert.Equal(1, (int)parsedData[0]);
+            Assert.Equal("071523a4-516f-4fce-ba4b-0d11ab7a1893", (string)parsedData[1]);
+            Assert.Equal("", (string)parsedData[2]);
+            Assert.Equal(1, (int)parsedData[3]);
+        }
     }
 }

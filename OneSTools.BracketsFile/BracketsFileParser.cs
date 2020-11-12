@@ -24,7 +24,7 @@ namespace OneSTools.BracketsFile
 
             var root = new BracketsFileNode();
 
-            Parse(root, ref t, text.IndexOf('{') + 1, t.Length - 2);
+            Parse(root, ref t, text.IndexOf('{') + 1, t.LastIndexOf('}'));
 
             return root;
         }

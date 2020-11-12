@@ -15,11 +15,16 @@
     <RepositoryUrl>https://github.com/akpaevj/OneSTools.BracketsFile</RepositoryUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
-    <Version>2.0.6</Version>
+    <Version>2.0.7</Version>
+    <PackageIcon>onestools_icon_nuget.png</PackageIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <None Include="..\LICENSE.md">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+    <None Include="C:\Users\akpaev.e.ENTERPRISE\source\repos\onestools_icon_nuget.png">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
