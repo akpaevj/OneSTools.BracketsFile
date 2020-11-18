@@ -17,7 +17,7 @@ namespace OneSTools.BracketsFile.Tests
                 "}";
 
             // Act
-            var parsedData = BracketsFileParser.ParseBlock(ref data);
+            var parsedData = BracketsFileParser.ParseBlock(data);
 
             // Assert
             Assert.Equal(19, parsedData.Count);
@@ -62,7 +62,7 @@ namespace OneSTools.BracketsFile.Tests
                 "}";
 
             // Act
-            var parsedData = BracketsFileParser.ParseBlock(ref data);
+            var parsedData = BracketsFileParser.ParseBlock(data);
 
             // Assert
             Assert.Equal(19, parsedData.Count);
@@ -103,7 +103,7 @@ namespace OneSTools.BracketsFile.Tests
             var data = "{1,071523a4-516f-4fce-ba4b-0d11ab7a1893,\"\",1}";
 
             // Act
-            var parsedData = BracketsFileParser.ParseBlock(ref data);
+            var parsedData = BracketsFileParser.ParseBlock(data);
 
             // Assert
             Assert.Equal(4, parsedData.Count);
@@ -120,7 +120,7 @@ namespace OneSTools.BracketsFile.Tests
             var value = @"{{1234,N,1234N,""123"",{0},{0,0},{""U""},""Hello, symbol is '{'"",""Symbol is '}'"",""%Symbol is """"}"""""",""symbol is ','"",""2 symbol is ','""},""}"","","",""""}";
 
             // Act
-            var block = BracketsFileParser.ParseBlock(ref value);
+            var block = BracketsFileParser.ParseBlock(value);
 
             // Assert
             Assert.Equal(4, block.Count);

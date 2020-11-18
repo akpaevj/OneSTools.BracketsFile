@@ -15,15 +15,17 @@ namespace OneSTools.BracketsFile
     {
         public static BracketsFileNode ParseBlock(string text, int startIndex = 0, int endIndex = -1)
         {
-            return ParseBlock(ref text, startIndex, endIndex);
+            var strBuilder = new StringBuilder(text);
+
+            return ParseBlock(strBuilder, startIndex, endIndex);
         }
        
-        public static BracketsFileNode ParseBlock(ref string text, int startIndex = 0, int endIndex = -1)
+        public static BracketsFileNode ParseBlock(StringBuilder text, int startIndex = 0, int endIndex = -1)
         {
             var node = new BracketsFileNode();
 
             if (endIndex == -1)
-                endIndex = GetNodeEndIndex(ref text, startIndex);
+                endIndex = GetNodeEndIndex(text, startIndex);
             if (endIndex == -1)
                 endIndex = text.Length - 1;
 
@@ -39,24 +41,24 @@ namespace OneSTools.BracketsFile
 
                 if (currentChar == '"') // string value
                 {
-                    var valueEndIndex = GetTextValueEndIndex(ref text, i);
-                    var value = text.Substring(i + 1, valueEndIndex - i - 1);
+                    var valueEndIndex = GetTextValueEndIndex(text, i);
+                    var value = text.ToString(i + 1, valueEndIndex - i - 1);
                     node.Nodes.Add(new BracketsFileNode(value));
 
                     i = valueEndIndex;
                 }
                 else if (currentChar == '{') // new block
                 {
-                    var valueEndIndex = GetNodeEndIndex(ref text, i);
-                    var value = ParseBlock(ref text, i, valueEndIndex);
+                    var valueEndIndex = GetNodeEndIndex(text, i);
+                    var value = ParseBlock(text, i, valueEndIndex);
                     node.Nodes.Add(value);
 
                     i = valueEndIndex;
                 }
                 else if (currentChar != '"' && currentChar != '}' && currentChar != ',' && !char.IsWhiteSpace(currentChar)) // another value
                 {
-                    var valueEndIndex = GetValueEndIndex(ref text, i);
-                    var value = text.Substring(i, valueEndIndex - i);
+                    var valueEndIndex = GetValueEndIndex(text, i);
+                    var value = text.ToString(i, valueEndIndex - i);
                     node.Nodes.Add(new BracketsFileNode(value));
 
                     i = valueEndIndex;
@@ -66,7 +68,7 @@ namespace OneSTools.BracketsFile
             return node;
         }
 
-        public static int GetNodeEndIndex(ref string text, int startIndex)
+        public static int GetNodeEndIndex(StringBuilder text, int startIndex)
         {
             int quotes = 0;
             int brackets = 0;
@@ -78,7 +80,7 @@ namespace OneSTools.BracketsFile
 
                 if (prevChar == ',' && currentChar == '"')
                 {
-                    var textValueEndIndex = GetTextValueEndIndex(ref text, i);
+                    var textValueEndIndex = GetTextValueEndIndex(text, i);
 
                     if (textValueEndIndex == -1)
                         return textValueEndIndex;
@@ -101,7 +103,7 @@ namespace OneSTools.BracketsFile
             return -1;
         }
 
-        public static int GetValueEndIndex(ref string text, int startIndex)
+        public static int GetValueEndIndex(StringBuilder text, int startIndex)
         {
             for (int i = startIndex; i < text.Length; i++)
             {
@@ -114,7 +116,7 @@ namespace OneSTools.BracketsFile
             return -1;
         }
 
-        public static int GetTextValueEndIndex(ref string text, int startIndex)
+        public static int GetTextValueEndIndex(StringBuilder text, int startIndex)
         {
             var brackets = 0;
 
