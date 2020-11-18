@@ -7,7 +7,7 @@ namespace OneSTools.BracketsFile.Tests
     public class BracketsFileParserTests
     {
         [Fact]
-        public void ParseTest()
+        public void Parse1Test()
         {
             // Arrange
             var data = "{20201005114853,U,\n" +
@@ -17,7 +17,7 @@ namespace OneSTools.BracketsFile.Tests
                 "}";
 
             // Act
-            var parsedData = BracketsFileParser.Parse(data);
+            var parsedData = BracketsFileParser.ParseBlock(ref data);
 
             // Assert
             Assert.Equal(19, parsedData.Count);
@@ -48,7 +48,7 @@ namespace OneSTools.BracketsFile.Tests
         }
 
         [Fact]
-        public void ParseTest2()
+        public void Parse2Test()
         {
             // Arrange
             var data = "{20201005085729,U,\n" +
@@ -62,7 +62,7 @@ namespace OneSTools.BracketsFile.Tests
                 "}";
 
             // Act
-            var parsedData = BracketsFileParser.Parse(data);
+            var parsedData = BracketsFileParser.ParseBlock(ref data);
 
             // Assert
             Assert.Equal(19, parsedData.Count);
@@ -97,13 +97,13 @@ namespace OneSTools.BracketsFile.Tests
         }
 
         [Fact]
-        public void ParseTest3()
+        public void Parse3Test()
         {
             // Arrange
             var data = "{1,071523a4-516f-4fce-ba4b-0d11ab7a1893,\"\",1}";
 
             // Act
-            var parsedData = BracketsFileParser.Parse(data);
+            var parsedData = BracketsFileParser.ParseBlock(ref data);
 
             // Assert
             Assert.Equal(4, parsedData.Count);
@@ -111,6 +111,32 @@ namespace OneSTools.BracketsFile.Tests
             Assert.Equal("071523a4-516f-4fce-ba4b-0d11ab7a1893", (string)parsedData[1]);
             Assert.Equal("", (string)parsedData[2]);
             Assert.Equal(1, (int)parsedData[3]);
+        }
+
+        [Fact]
+        public void Parse4Test()
+        {
+            // Arrange
+            var value = @"{{1234,N,1234N,""123"",{0},{0,0},{""U""},""Hello, symbol is '{'"",""Symbol is '}'"",""%Symbol is """"}"""""",""symbol is ','"",""2 symbol is ','""},""}"","","",""""}";
+
+            // Act
+            var block = BracketsFileParser.ParseBlock(ref value);
+
+            // Assert
+            Assert.Equal(4, block.Count);
+        }
+
+        [Fact]
+        public void Parse5Test()
+        {
+            // Arrange
+            var value = @"{{1234,N,1234N,""123"",{0},{0,0},{""U""},""Hello, symbol is '{'"",""Symbol is '}'"",""%Symbol is """"}"""""",""symbol is ','"",""2 symbol is ','""},""}"","","",""""}";
+
+            // Act
+            var block = BracketsFileParser.ParseBlock(value);
+
+            // Assert
+            Assert.Equal(4, block.Count);
         }
     }
 }

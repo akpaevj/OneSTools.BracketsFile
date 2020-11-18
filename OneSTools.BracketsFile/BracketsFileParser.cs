@@ -13,126 +13,110 @@ namespace OneSTools.BracketsFile
     /// </summary>
     public static class BracketsFileParser
     {
-        /// <summary>
-        /// Parses the text and retuns an instance of the "BracketsFileNode" class
-        /// </summary>
-        /// <param name="text">The source text of the 1C "brackets file"</param>
-        /// <returns></returns>
-        public static BracketsFileNode Parse(string text)
+        public static BracketsFileNode ParseBlock(string text, int startIndex = 0, int endIndex = -1)
         {
-            var t = Regex.Replace(text, @"(\n|\r)", "");
-
-            var root = new BracketsFileNode();
-
-            Parse(root, ref t, text.IndexOf('{') + 1, t.LastIndexOf('}'));
-
-            return root;
+            return ParseBlock(ref text, startIndex, endIndex);
         }
-
-        private static void Parse(BracketsFileNode parentNode, ref string text, int currentIndex, int lastIndex)
+       
+        public static BracketsFileNode ParseBlock(ref string text, int startIndex = 0, int endIndex = -1)
         {
-            var propNodeStartPosition = -1;
+            var node = new BracketsFileNode();
 
-            for (int i = currentIndex; i <= lastIndex; i++)
+            if (endIndex == -1)
+                endIndex = GetNodeEndIndex(ref text, startIndex);
+            if (endIndex == -1)
+                endIndex = text.Length - 1;
+
+            if (text[startIndex] == '{' && text[endIndex] == '}')
             {
-                char currentChar = text[i];
-                char nextChar = text.Length > i + 1 ? text[i + 1] : '\0';
+                startIndex += 1;
+                endIndex -= 1;
+            }
 
-                if (currentChar == '{')
+            for (int i = startIndex; i <= endIndex; i++)
+            {
+                var currentChar = text[i];
+
+                if (currentChar == '"') // string value
                 {
-                    propNodeStartPosition = -1;
+                    var valueEndIndex = GetTextValueEndIndex(ref text, i);
+                    var value = text.Substring(i + 1, valueEndIndex - i - 1);
+                    node.Nodes.Add(new BracketsFileNode(value));
 
-                    var nodeEndIndex = GetNodeEndIndex(ref text, i);
-
-                    var node = new BracketsFileNode();
-                    parentNode.Nodes.Add(node);
-
-                    Parse(node, ref text, i + 1, nodeEndIndex);
-
-                    i = nodeEndIndex;
+                    i = valueEndIndex;
                 }
-                else if (currentChar == ',')
+                else if (currentChar == '{') // new block
                 {
-                    if (propNodeStartPosition != -1)
-                    {
-                        var t = text.Substring(propNodeStartPosition, i - propNodeStartPosition).Trim('"');
+                    var valueEndIndex = GetNodeEndIndex(ref text, i);
+                    var value = ParseBlock(ref text, i, valueEndIndex);
+                    node.Nodes.Add(value);
 
-                        var node = new BracketsFileNode(t);
-                        parentNode.Nodes.Add(node);
-
-                        propNodeStartPosition = -1;
-                    }
-
-                    // Read text value (string between ," and ",)
-                    if (currentChar == ',' && nextChar == '"' && propNodeStartPosition == -1)
-                    {
-                        var valueEndIndex = GetTextValueEndIndex(ref text, i);
-                        var textValue = text.Substring(i + 1, valueEndIndex - i).Trim('"');
-
-                        var node = new BracketsFileNode(textValue);
-                        parentNode.Nodes.Add(node);
-
-                        propNodeStartPosition = -1;
-
-                        i = valueEndIndex;
-                    }
+                    i = valueEndIndex;
                 }
-                else
+                else if (currentChar != '"' && currentChar != '}' && currentChar != ',' && !char.IsWhiteSpace(currentChar)) // another value
                 {
-                    if (propNodeStartPosition == -1)
-                        propNodeStartPosition = i;
+                    var valueEndIndex = GetValueEndIndex(ref text, i);
+                    var value = text.Substring(i, valueEndIndex - i);
+                    node.Nodes.Add(new BracketsFileNode(value));
+
+                    i = valueEndIndex;
                 }
             }
 
-            if (propNodeStartPosition != -1)
-            {
-                var offset = text[lastIndex - propNodeStartPosition] == '}' ? 1 : 0;
-                var count = lastIndex - propNodeStartPosition - offset;
-                if (count > 0)
-                {
-                    var t = text.Substring(propNodeStartPosition, lastIndex - propNodeStartPosition - offset).Trim('"');
-                    var node = new BracketsFileNode(t);
-                    parentNode.Nodes.Add(node);
-                }
-            }
+            return node;
         }
 
-        /// <summary>
-        /// Returns the end index of the current block
-        /// </summary>
-        /// <param name="text"></param>
-        /// <param name="startIndex"></param>
-        /// <returns></returns>
-        private static int GetNodeEndIndex(ref string text, int startIndex)
-        { 
-            int endIndex = text.Length - startIndex - 1;
-            int quotesAmount = 0;
-            int bracketAmount = 0;
+        public static int GetNodeEndIndex(ref string text, int startIndex)
+        {
+            int quotes = 0;
+            int brackets = 0;
 
-            for (int x = startIndex; x < text.Length; x++)
+            for (int i = startIndex; i < text.Length; i++)
             {
-                var currentChar = text[x];
+                var prevChar = i > startIndex ? text[i - 1] : '\0';
+                var currentChar = text[i];
 
-                if (currentChar == '{')
-                    bracketAmount += 1;
+                if (prevChar == ',' && currentChar == '"')
+                {
+                    var textValueEndIndex = GetTextValueEndIndex(ref text, i);
+
+                    if (textValueEndIndex == -1)
+                        return textValueEndIndex;
+
+                    i = textValueEndIndex;
+                    continue;
+                }
+
+                if (currentChar == '"')
+                    quotes++;
+                else if (currentChar == '{')
+                    brackets++;
                 else if (currentChar == '}')
-                    bracketAmount -= 1;
-                else if (currentChar == '"')
-                    quotesAmount += 1;
+                    brackets--;
 
-                endIndex = x;
-
-                if (bracketAmount == 0 && (quotesAmount % 2) == 0)
-                    break;
+                if (brackets == 0 && (quotes == 0 || (quotes != 0 && (quotes % 2) == 0)))
+                    return i;
             }
 
-            return endIndex;
+            return -1;
         }
 
-        private static int GetTextValueEndIndex(ref string text, int startIndex)
+        public static int GetValueEndIndex(ref string text, int startIndex)
         {
-            var quotesAmount = 0;
-            var endIndex = -1;
+            for (int i = startIndex; i < text.Length; i++)
+            {
+                var c = text[i];
+
+                if (c == ',' || c == '}')
+                    return i;
+            }
+
+            return -1;
+        }
+
+        public static int GetTextValueEndIndex(ref string text, int startIndex)
+        {
+            var brackets = 0;
 
             for (int i = startIndex; i < text.Length; i++)
             {
@@ -140,13 +124,13 @@ namespace OneSTools.BracketsFile
                 var nextChar = text.Length > i + 1 ? text[i + 1] : '\0';
 
                 if (currentChar == '"')
-                    quotesAmount += 1;
+                    brackets++;
 
-                if (quotesAmount != 0 && (quotesAmount % 2) == 0 && (nextChar == ',' || nextChar == '}'))
+                if (currentChar == '"' && (nextChar == ',' || nextChar == '}') && (brackets == 0 || brackets % 2 == 0))
                     return i;
             }
 
-            return endIndex;
+            return -1;
         }
     }
 }
