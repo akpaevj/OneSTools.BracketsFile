@@ -15,7 +15,11 @@ namespace OneSTools.BracketsFile
         /// <summary>
         /// Current position of the stream
         /// </summary>
-        public long Position => _stream.Position;
+        public long Position
+        {
+            get => _stream.Position;
+            set => _stream.Position = value;
+        }
         /// <summary>
         /// Stream's end flag
         /// </summary>
