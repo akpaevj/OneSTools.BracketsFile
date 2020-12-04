@@ -1,13 +1,17 @@
 using System;
 using Xunit;
 using OneSTools.BracketsFile;
+using System.Text;
+using System.IO;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace OneSTools.BracketsFile.Tests
 {
     public class BracketsFileParserTests
     {
         [Fact]
-        public void Parse1Test()
+        public void ParseBlock1Test()
         {
             // Arrange
             var data = "{20201005114853,U,\n" +
@@ -17,7 +21,7 @@ namespace OneSTools.BracketsFile.Tests
                 "}";
 
             // Act
-            var parsedData = BracketsFileParser.ParseBlock(data);
+            var parsedData = BracketsParser.ParseBlock(data);
 
             // Assert
             Assert.Equal(19, parsedData.Count);
@@ -48,7 +52,7 @@ namespace OneSTools.BracketsFile.Tests
         }
 
         [Fact]
-        public void Parse2Test()
+        public void ParseBlock2Test()
         {
             // Arrange
             var data = "{20201005085729,U,\n" +
@@ -62,7 +66,7 @@ namespace OneSTools.BracketsFile.Tests
                 "}";
 
             // Act
-            var parsedData = BracketsFileParser.ParseBlock(data);
+            var parsedData = BracketsParser.ParseBlock(data);
 
             // Assert
             Assert.Equal(19, parsedData.Count);
@@ -97,46 +101,77 @@ namespace OneSTools.BracketsFile.Tests
         }
 
         [Fact]
-        public void Parse3Test()
+        public void ParseBlock3Test()
         {
             // Arrange
             var data = "{1,071523a4-516f-4fce-ba4b-0d11ab7a1893,\"\",1}";
 
             // Act
-            var parsedData = BracketsFileParser.ParseBlock(data);
+            var parsedData = BracketsParser.ParseBlock(data);
 
             // Assert
             Assert.Equal(4, parsedData.Count);
             Assert.Equal(1, (int)parsedData[0]);
-            Assert.Equal("071523a4-516f-4fce-ba4b-0d11ab7a1893", (string)parsedData[1]);
-            Assert.Equal("", (string)parsedData[2]);
+            Assert.True("071523a4-516f-4fce-ba4b-0d11ab7a1893".Equals((string)parsedData[1]));
+            Assert.True(string.Empty == (string)parsedData[2]);
             Assert.Equal(1, (int)parsedData[3]);
         }
 
         [Fact]
-        public void Parse4Test()
+        public void ParseBlock4Test()
         {
             // Arrange
             var value = @"{{1234,N,1234N,""123"",{0},{0,0},{""U""},""Hello, symbol is '{'"",""Symbol is '}'"",""%Symbol is """"}"""""",""symbol is ','"",""2 symbol is ','""},""}"","","",""""}";
 
             // Act
-            var block = BracketsFileParser.ParseBlock(value);
+            var block = BracketsParser.ParseBlock(value);
 
             // Assert
             Assert.Equal(4, block.Count);
         }
-
+        
         [Fact]
-        public void Parse5Test()
+        public void GetNodeEndIndexTest()
         {
-            // Arrange
-            var value = @"{{1234,N,1234N,""123"",{0},{0,0},{""U""},""Hello, symbol is '{'"",""Symbol is '}'"",""%Symbol is """"}"""""",""symbol is ','"",""2 symbol is ','""},""}"","","",""""}";
+            // Arrange 
+            var strBuilder = new StringBuilder(@"{3,""WSConnection"",1},");
 
             // Act
-            var block = BracketsFileParser.ParseBlock(value);
+            var index = BracketsParser.GetNodeEndIndex(strBuilder, 0);
 
             // Assert
-            Assert.Equal(4, block.Count);
+            Assert.Equal(19, index);
+        }
+
+        [Fact]
+        public void BracketsListReaderTest()
+        {
+            // Arrange 
+            var data = "23e32 \n{1,\"WSConnection\",1},{2,\"WSConnection\",1},\n{3,\"WSConnection\",1},{";
+            using var mStream = new MemoryStream(Encoding.UTF8.GetBytes(data));
+            using var reader = new BracketsListReader(mStream);
+
+            int count = 0;
+
+            var resultItems = new List<string>();
+
+            // Act
+            while (!reader.EndOfStream)
+            {
+                var item = reader.NextItem();
+
+                if (item is null)
+                    break;
+
+                count++;
+                resultItems.Add(item);
+            }
+
+            // Assert
+            Assert.Equal(3, count);
+            Assert.Equal("{1,\"WSConnection\",1}", resultItems[0]);
+            Assert.Equal("{2,\"WSConnection\",1}", resultItems[1]);
+            Assert.Equal("{3,\"WSConnection\",1}", resultItems[2]);
         }
     }
 }

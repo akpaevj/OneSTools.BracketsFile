@@ -4,14 +4,14 @@ using System.Collections.Generic;
 
 namespace OneSTools.BracketsFile
 {
-    public class BracketsFileNode : IEnumerable<BracketsFileNode>
+    public class BracketsNode : IEnumerable<BracketsNode>
     {
         public bool IsValueNode { get; private set; }
         public string Text { get; private set; }
-        public List<BracketsFileNode> Nodes { get; private set; } = new List<BracketsFileNode>();
+        public List<BracketsNode> Nodes { get; private set; } = new List<BracketsNode>();
         public int Count => Nodes.Count;
 
-        public BracketsFileNode this[int index]
+        public BracketsNode this[int index]
         {
             get
             {
@@ -19,19 +19,20 @@ namespace OneSTools.BracketsFile
             }
         }
 
-        public BracketsFileNode()
+        public BracketsNode()
         {
             IsValueNode = false;
         }
-        public BracketsFileNode(string text)
+
+        public BracketsNode(string text)
         {
             Text = text;
             IsValueNode = true;
         }
 
-        public BracketsFileNode GetNode(params int[] address)
+        public BracketsNode GetNode(params int[] address)
         {
-            BracketsFileNode currentNode = this;
+            BracketsNode currentNode = this;
 
             for (int i = 0; i < address.Length; i++)
             {
@@ -41,19 +42,19 @@ namespace OneSTools.BracketsFile
             return currentNode;
         }
 
-        public static explicit operator string(BracketsFileNode node)
+        public static explicit operator string(BracketsNode node)
         {
             return node.Text;
         }
-        public static explicit operator int(BracketsFileNode node)
+        public static explicit operator int(BracketsNode node)
         {
             return int.Parse(node.Text);
         }
-        public static explicit operator Guid(BracketsFileNode node)
+        public static explicit operator Guid(BracketsNode node)
         {
             return Guid.Parse(node.Text);
         }
-        public static explicit operator bool(BracketsFileNode node)
+        public static explicit operator bool(BracketsNode node)
         {
             if (!node.IsValueNode)
                 throw new ArgumentException("The node doesn't present a value");
@@ -74,7 +75,7 @@ namespace OneSTools.BracketsFile
                 return $"Count = {Nodes.Count}";
         }
 
-        public IEnumerator<BracketsFileNode> GetEnumerator()
+        public IEnumerator<BracketsNode> GetEnumerator()
         {
             return Nodes.GetEnumerator();
         }
