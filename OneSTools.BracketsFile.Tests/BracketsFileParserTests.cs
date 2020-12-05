@@ -147,7 +147,7 @@ namespace OneSTools.BracketsFile.Tests
         public void BracketsListReaderTest()
         {
             // Arrange 
-            var data = "23e32 \n{1,\"WSConnection\",1},{2,\"WSConnection\",1},\n{3,\"WSConnection\",1},{";
+            var data = "23e32 \n{1,\"WSConnection\",1},{2,\"WSConnection\",1},\n{3,\"WSConnection\",1},{ï";
             using var mStream = new MemoryStream(Encoding.UTF8.GetBytes(data));
             using var reader = new BracketsListReader(mStream);
 
@@ -158,7 +158,7 @@ namespace OneSTools.BracketsFile.Tests
             // Act
             while (!reader.EndOfStream)
             {
-                var item = reader.NextItem();
+                var item = reader.NextNodeAsString();
 
                 if (item is null)
                     break;
@@ -172,6 +172,7 @@ namespace OneSTools.BracketsFile.Tests
             Assert.Equal("{1,\"WSConnection\",1}", resultItems[0]);
             Assert.Equal("{2,\"WSConnection\",1}", resultItems[1]);
             Assert.Equal("{3,\"WSConnection\",1}", resultItems[2]);
+            Assert.Equal(71, reader.Position);
         }
     }
 }

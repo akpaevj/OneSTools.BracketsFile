@@ -9,7 +9,7 @@ namespace OneSTools.BracketsFile
     /// </summary>
     public class BracketsListReader : IDisposable
     {
-        private readonly BufferedStream _stream;
+        private readonly StreamReader _stream;
         private bool disposedValue;
 
         /// <summary>
@@ -17,24 +17,27 @@ namespace OneSTools.BracketsFile
         /// </summary>
         public long Position
         {
-            get => _stream.Position;
-            set => _stream.Position = value;
+            get => _stream.GetPosition();
+            set => _stream.SetPosition(value);
         }
         /// <summary>
         /// Stream's end flag
         /// </summary>
-        public bool EndOfStream => _stream.Position == _stream.Length;
+        public bool EndOfStream => _stream.EndOfStream;
 
         public BracketsListReader(Stream stream)
-            => _stream = new BufferedStream(stream);
+            => _stream = new StreamReader(stream);
+
+        public BracketsListReader(Stream stream, int bufferSize)
+            => _stream = new StreamReader(stream, Encoding.UTF8, false, bufferSize);
 
         /// <summary>
         /// Reads and returns data of the next "brackets" item. If there is no data or the end of the item hasn't been found than it returns null
         /// </summary>
         /// <returns></returns>
-        public string NextItem()
+        public string NextNodeAsString()
         {
-            var itemBuilder = NextItemBuilder();
+            var itemBuilder = NextNodeAsStringBuilder();
 
             if (itemBuilder.Length == 0)
                 return null;
@@ -43,10 +46,24 @@ namespace OneSTools.BracketsFile
         }
 
         /// <summary>
+        /// Reads and returns data of the next "brackets" item. If there is no data or the end of the item hasn't been found than it returns null
+        /// </summary>
+        /// <returns></returns>
+        public BracketsNode NextNode()
+        {
+            var itemBuilder = NextNodeAsStringBuilder();
+
+            if (itemBuilder.Length == 0)
+                return null;
+            else
+                return BracketsParser.ParseBlock(itemBuilder);
+        }
+
+        /// <summary>
         /// Reads and returns a string builder of the next "brackets" item. If there is no data or the end of the item hasn't been found than it returns empty string builder
         /// </summary>
         /// <returns></returns>
-        public StringBuilder NextItemBuilder()
+        public StringBuilder NextNodeAsStringBuilder()
         {
             var itemData = new StringBuilder();
 
@@ -58,7 +75,7 @@ namespace OneSTools.BracketsFile
 
             while (!EndOfStream)
             {
-                var currentChar = (char)_stream.ReadByte();
+                var currentChar = (char)_stream.Read();
 
                 if (currentChar == -1)
                     break;
@@ -78,8 +95,14 @@ namespace OneSTools.BracketsFile
                     break;
             }
 
+            // if there is no end index than set stream's position to the beginning of the item and returns empty value
             if (endIndex == -1)
+            {
+                var itemDataBytesLength = _stream.CurrentEncoding.GetBytes(itemData.ToString()).Length;
+                _stream.SetPosition(_stream.GetPosition() - itemDataBytesLength);
+
                 return itemData.Clear();
+            }
 
             return itemData;
         }
