@@ -1,4 +1,4 @@
-using System;
+п»їusing System;
 using Xunit;
 using OneSTools.BracketsFile;
 using System.Text;
@@ -16,7 +16,7 @@ namespace OneSTools.BracketsFile.Tests
             // Arrange
             var data = "{20201005114853,U,\n" +
                 "{243b06bad83e0,7b3156},71,36,1,13732,11,I,\"\",55,\n" +
-                "{\"R\",490:bace0cc47a56444311eaedd56d0dbdf8},\"Отчет производства за \"\",смену Уни00023710 от 03.09.2020 14:05:56\",1,1,0,1101,0,\n" +
+                "{\"R\",490:bace0cc47a56444311eaedd56d0dbdf8},\"РћС‚С‡РµС‚ РїСЂРѕРёР·РІРѕРґСЃС‚РІР° Р·Р° \"\",СЃРјРµРЅСѓ РЈРЅРё00023710 РѕС‚ 03.09.2020 14:05:56\",1,1,0,1101,0,\n" +
                 "{0}" +
                 "}";
 
@@ -41,7 +41,7 @@ namespace OneSTools.BracketsFile.Tests
             Assert.False(parsedData[11].IsValueNode);
             Assert.Equal("R", (string)parsedData[11].Nodes[0]);
             Assert.Equal("490:bace0cc47a56444311eaedd56d0dbdf8", (string)parsedData[11].Nodes[1]);
-            Assert.Equal("Отчет производства за \"\",смену Уни00023710 от 03.09.2020 14:05:56", (string)parsedData[12]);
+            Assert.Equal("РћС‚С‡РµС‚ РїСЂРѕРёР·РІРѕРґСЃС‚РІР° Р·Р° \"\",СЃРјРµРЅСѓ РЈРЅРё00023710 РѕС‚ 03.09.2020 14:05:56", (string)parsedData[12]);
             Assert.Equal(1, (int)parsedData[13]);
             Assert.Equal(1, (int)parsedData[14]);
             Assert.Equal(0, (int)parsedData[15]);
@@ -59,7 +59,7 @@ namespace OneSTools.BracketsFile.Tests
                 "{0,0},75,2,5,15446,1,I,\"\",0,\n" +
                 "{\"P\",\n" +
                 "{2," +
-                "{\"S\",\"исрв\"}\n" +
+                "{\"S\",\"РёСЃСЂРІ\"}\n" +
                 "}\n" +
                 "},\"\",1,1,0,1137,0,\n" +
                 "{0}" +
@@ -89,7 +89,7 @@ namespace OneSTools.BracketsFile.Tests
             Assert.Equal(2, (int)parsedData[11][1][0]);
             Assert.False(parsedData[11][1][1].IsValueNode);
             Assert.Equal("S", (string)parsedData[11][1][1][0]);
-            Assert.Equal("исрв", (string)parsedData[11][1][1][1]);
+            Assert.Equal("РёСЃСЂРІ", (string)parsedData[11][1][1][1]);
             Assert.Equal("", (string)parsedData[12]);
             Assert.Equal(1, (int)parsedData[13]);
             Assert.Equal(1, (int)parsedData[14]);
@@ -147,7 +147,7 @@ namespace OneSTools.BracketsFile.Tests
         public void BracketsListReaderTest()
         {
             // Arrange 
-            var data = "23e32 \n{1,\"WSConnection\",1},{2,\"WSConnection\",1},\n{3,\"WSConnection\",1},{п";
+            var data = "23e32 \n{1,\"WSConnection\",1},{2,\"WSConnection\",1},\n{3,\"WSConnection\",1},{Рї";
             using var mStream = new MemoryStream(Encoding.UTF8.GetBytes(data));
             using var reader = new BracketsListReader(mStream);
 
@@ -158,13 +158,13 @@ namespace OneSTools.BracketsFile.Tests
             // Act
             while (!reader.EndOfStream)
             {
-                var item = reader.NextNodeAsString();
+                var item = reader.NextNodeAsStringBuilder();
 
-                if (item is null)
+                if (item.Length == 0)
                     break;
 
                 count++;
-                resultItems.Add(item);
+                resultItems.Add(item.ToString());
             }
 
             // Assert
@@ -173,6 +173,19 @@ namespace OneSTools.BracketsFile.Tests
             Assert.Equal("{2,\"WSConnection\",1}", resultItems[1]);
             Assert.Equal("{3,\"WSConnection\",1}", resultItems[2]);
             Assert.Equal(71, reader.Position);
+        }
+
+        [Fact]
+        public void BracketsParserMultilineParseTest()
+        {
+            // Arrange 
+            var strBuilder = "{32059,\r\n{29058,\r\n{00000000-0000-0000-0000-000000000000,\"SystemSettings\",1}\r\n}\r\n}";
+    
+            // Act
+            var node = BracketsParser.ParseBlock(strBuilder);
+
+            // Assert
+            //Assert.Equal(19, index);
         }
     }
 }

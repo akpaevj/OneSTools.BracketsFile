@@ -31,6 +31,9 @@ namespace OneSTools.BracketsFile
         public BracketsListReader(Stream stream, int bufferSize)
             => _stream = new StreamReader(stream, Encoding.UTF8, false, bufferSize);
 
+        public BracketsListReader(StreamReader stream)
+            => _stream = stream;
+
         /// <summary>
         /// Reads and returns data of the next "brackets" item. If there is no data or the end of the item hasn't been found than it returns null
         /// </summary>
