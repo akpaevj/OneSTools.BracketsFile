@@ -42,19 +42,39 @@ namespace OneSTools.BracketsFile
             return currentNode;
         }
 
-        public static explicit operator string(BracketsNode node)
+        public static implicit operator string(BracketsNode node)
         {
             return node.Text;
         }
-        public static explicit operator int(BracketsNode node)
+        public static implicit operator short(BracketsNode node)
+        {
+            return short.Parse(node.Text);
+        }
+        public static implicit operator ushort(BracketsNode node)
+        {
+            return ushort.Parse(node.Text);
+        }
+        public static implicit operator int(BracketsNode node)
         {
             return int.Parse(node.Text);
         }
-        public static explicit operator Guid(BracketsNode node)
+        public static implicit operator uint(BracketsNode node)
+        {
+            return uint.Parse(node.Text);
+        }
+        public static implicit operator long(BracketsNode node)
+        {
+            return long.Parse(node.Text);
+        }
+        public static implicit operator ulong(BracketsNode node)
+        {
+            return ulong.Parse(node.Text);
+        }
+        public static implicit operator Guid(BracketsNode node)
         {
             return Guid.Parse(node.Text);
         }
-        public static explicit operator bool(BracketsNode node)
+        public static implicit operator bool(BracketsNode node)
         {
             if (!node.IsValueNode)
                 throw new ArgumentException("The node doesn't present a value");
