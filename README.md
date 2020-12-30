@@ -2,7 +2,7 @@
 [![Nuget](https://img.shields.io/nuget/v/OneSTools.BracketsFile)](https://www.nuget.org/packages/OneSTools.BracketsFile)<br>
 Библиотека для парсинга внутрисистемного формата файлов 1С.
 
-Файлы данного формата запакованы в raw deflate (сырой deflate) и в распакованном виде представляют из себя иерархический массив значений:
+Файлы данного формата размещаются либо в чистом виде, либо запакованы в raw deflate (сырой deflate) и представляют из себя дерево значений:
 ```
 {
   Value,
