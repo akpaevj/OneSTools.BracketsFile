@@ -71,10 +71,12 @@ namespace OneSTools.BracketsFile
             var itemData = new StringBuilder();
 
             var started = false;
-            int index = 0;
-            int quotes = 0;
-            int brackets = 0;
+            var index = 0;
+            var quotes = 0;
+            var brackets = 0;
             var endIndex = -1;
+            var textValueStartIndex = 0;
+            var textValueStarted = false;
 
             while (!EndOfStream)
             {
@@ -92,7 +94,19 @@ namespace OneSTools.BracketsFile
                 else
                     continue;
 
-                endIndex = BracketsParser.GetNodeEndIndex(itemData, ref index, ref quotes, ref brackets);
+                if (textValueStarted)
+                {
+                    if (BracketsParser.GetTextValueEndIndex(itemData, textValueStartIndex) != -1)
+                    {
+                        index = itemData.Length - 1;
+                        textValueStartIndex = -1;
+                        textValueStarted = false;
+                    }
+                    else
+                        continue;
+                }
+                else
+                    endIndex = BracketsParser.GetNodeEndIndex(itemData, ref index, ref quotes, ref brackets, ref textValueStartIndex, ref textValueStarted);
 
                 if (endIndex != -1)
                     break;
@@ -132,7 +146,6 @@ namespace OneSTools.BracketsFile
 
         public void Dispose()
         {
-            // Не изменяйте этот код. Разместите код очистки в методе "Dispose(bool disposing)".
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }

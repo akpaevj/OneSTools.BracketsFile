@@ -47,33 +47,45 @@ namespace OneSTools.BracketsFile
                 endIndex -= 1;
             }
 
-            for (int i = startIndex; i <= endIndex; i++)
+            for (var i = startIndex; i <= endIndex; i++)
             {
                 var currentChar = text[i];
 
-                if (currentChar == '"') // string value
+                switch (currentChar)
                 {
-                    var valueEndIndex = GetTextValueEndIndex(text, i);
-                    var value = text.ToString(i + 1, valueEndIndex - i - 1);
-                    node.Nodes.Add(new BracketsNode(value));
+                    // string value
+                    case '"':
+                    {
+                        var valueEndIndex = GetTextValueEndIndex(text, i);
+                        var value = text.ToString(i + 1, valueEndIndex - i - 1);
+                        node.Nodes.Add(new BracketsNode(value));
 
-                    i = valueEndIndex;
-                }
-                else if (currentChar == '{') // new block
-                {
-                    var valueEndIndex = GetNodeEndIndex(text, i);
-                    var value = ParseBlock(text, i, valueEndIndex);
-                    node.Nodes.Add(value);
+                        i = valueEndIndex;
+                        break;
+                    }
+                    // new block
+                    case '{':
+                    {
+                        var valueEndIndex = GetNodeEndIndex(text, i);
+                        var value = ParseBlock(text, i, valueEndIndex);
+                        node.Nodes.Add(value);
 
-                    i = valueEndIndex;
-                }
-                else if (currentChar != '"' && currentChar != '}' && currentChar != ',' && !char.IsWhiteSpace(currentChar)) // another value
-                {
-                    var valueEndIndex = GetValueEndIndex(text, i);
-                    var value = text.ToString(i, valueEndIndex - i);
-                    node.Nodes.Add(new BracketsNode(value));
+                        i = valueEndIndex;
+                        break;
+                    }
+                    default:
+                    {
+                        if (currentChar != '"' && currentChar != '}' && currentChar != ',' && !char.IsWhiteSpace(currentChar)) // another value
+                        {
+                            var valueEndIndex = GetValueEndIndex(text, i);
+                            var value = text.ToString(i, valueEndIndex - i);
+                            node.Nodes.Add(new BracketsNode(value));
 
-                    i = valueEndIndex;
+                            i = valueEndIndex;
+                        }
+
+                        break;
+                    }
                 }
             }
 
@@ -88,10 +100,12 @@ namespace OneSTools.BracketsFile
         /// <returns></returns>
         public static int GetNodeEndIndex(StringBuilder text, int startIndex)
         {
-            int quotes = 0;
-            int brackets = 0;
+            var quotes = 0;
+            var brackets = 0;
+            var textValueStartIndex = -1;
+            var textValueStarted = false;
 
-            return GetNodeEndIndex(text, ref startIndex, ref quotes, ref brackets);
+            return GetNodeEndIndex(text, ref startIndex, ref quotes, ref brackets, ref textValueStartIndex, ref textValueStarted);
         }
 
         /// <summary>
@@ -101,18 +115,21 @@ namespace OneSTools.BracketsFile
         /// <param name="index"></param>
         /// <param name="quotes"></param>
         /// <param name="brackets"></param>
+        /// <param name="textValueStartIndex"></param>
+        /// <param name="textValueStarted"></param>
         /// <returns></returns>
-        internal static int GetNodeEndIndex(StringBuilder text, ref int index, ref int quotes, ref int brackets)
+        internal static int GetNodeEndIndex(StringBuilder text, ref int index, ref int quotes, ref int brackets, ref int textValueStartIndex, ref bool textValueStarted)
         {
-            var startIndex = index;
-
             while (index < text.Length)
             {
-                var prevChar = index > startIndex ? text[index - 1] : '\0';
+                var prevChar = index > 0 ? text[index - 1] : '\0';
                 var currentChar = text[index];
 
-                if (prevChar == ',' && currentChar == '"')
+                if (!textValueStarted && prevChar == ',' && currentChar == '"')
                 {
+                    textValueStartIndex = index;
+                    textValueStarted = true;
+
                     var textValueEndIndex = GetTextValueEndIndex(text, index);
 
                     if (textValueEndIndex == -1)
@@ -121,17 +138,24 @@ namespace OneSTools.BracketsFile
                         return index;
                     }
 
+                    textValueStarted = false;
                     index = textValueEndIndex;
                     index++;
                     continue;
                 }
 
-                if (currentChar == '"')
-                    quotes++;
-                else if (currentChar == '{')
-                    brackets++;
-                else if (currentChar == '}')
-                    brackets--;
+                switch (currentChar)
+                {
+                    case '"':
+                        quotes++;
+                        break;
+                    case '{':
+                        brackets++;
+                        break;
+                    case '}':
+                        brackets--;
+                        break;
+                }
 
                 if (brackets == 0 && (quotes == 0 || (quotes != 0 && (quotes % 2) == 0)))
                     return index;
@@ -150,7 +174,7 @@ namespace OneSTools.BracketsFile
         /// <returns></returns>
         public static int GetValueEndIndex(StringBuilder text, int startIndex)
         {
-            for (int i = startIndex; i < text.Length; i++)
+            for (var i = startIndex; i < text.Length; i++)
             {
                 var c = text[i];
 
@@ -171,7 +195,7 @@ namespace OneSTools.BracketsFile
         {
             var brackets = 0;
 
-            for (int i = startIndex; i < text.Length; i++)
+            for (var i = startIndex; i < text.Length; i++)
             {
                 var currentChar = text[i];
                 var nextChar = text.Length > i + 1 ? text[i + 1] : '\0';

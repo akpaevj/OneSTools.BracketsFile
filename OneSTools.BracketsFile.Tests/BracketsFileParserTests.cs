@@ -147,11 +147,11 @@ namespace OneSTools.BracketsFile.Tests
         public void BracketsListReaderTest()
         {
             // Arrange 
-            var data = "23e32 \n{1,\"WSConnection\",1},{2,\"WSConnection\",1},\n{3,\"WSConnection\",1},{п";
+            const string data = "23e32 \n{1,\"WSConnection\",1},{2,\"WSConnection\",1},\n{3,\"WSConnection\",1},{п";
             using var mStream = new MemoryStream(Encoding.UTF8.GetBytes(data));
             using var reader = new BracketsListReader(mStream);
 
-            int count = 0;
+            var count = 0;
 
             var resultItems = new List<string>();
 
@@ -178,14 +178,24 @@ namespace OneSTools.BracketsFile.Tests
         [Fact]
         public void BracketsParserMultilineParseTest()
         {
-            // Arrange 
-            var strBuilder = "{32059,\r\n{29058,\r\n{00000000-0000-0000-0000-000000000000,\"SystemSettings\",1}\r\n}\r\n}";
-    
+            const string s = @"{20210119155711,N,
+                {0,0},7,3,4,159450,20,I,""Получен ответ Сервиса классификаторов:
+                [{""""classifierNick"""":""""PITDeductions"""",""""classifierName"""":""""Размер вычетов НДФЛ"""",""""versionDescription"""":"""""""",""""version"""":2,""""fileUrl"""":""""https://dl03.1c.ru/public/classifier/download/30c90ee3-1c5b-11e8-80d8-0050569f1015"""",""""fileSize"""":18822,""""hashSum"""":""""33L4yNJbCmDw7SrtM3XZzw==""""},{""""classifierNick"""":""""EffectiveDatesOfRegulatoryActs"""",""""classifierName"""":""""Даты вступления в силу нормативных актов"""",""""versionDescription"""":""""Дата вступления в силу постановления Правления ПФР от 27 сентября 2019 № 485п."""",""""version"""":6,""""fileUrl"""":""""https://dl03.1c.ru/public/classifier/download/c939a4f2-4670-11ea-80ed-0050569f1015"""",""""fileSize"""":1433,""""hashSum"""":""""hmZgfRmYQBeLy8zAhuzfdA==""""},{""""classifierNick"""":""""Countries"""",""""classifierName"""":""""Общероссийский классификатор стран мира (ОКСМ)"""",""""versionDescription"""":""""Изменение 25/2019 ОКСМ Общероссийский классификатор стран мира ОК (МК (ИСО 3166) 004-97) 025-2001 Республика Северная Македония"""",""""version"""":3,""""fileUrl"""":""""https://dl03.1c.ru/public/classifier/download/4cce28e4-9c02-11ea-80f4-0050569f1015"""",""""fileSize"""":64730,""""hashSum"""":""""pjlupZJ96+ZRkCVR3sYreA==""""},{""""classifierNick"""":""""Currencies"""",""""classifierName"""":""""Общероссийский классификатор валют (ОКВ)"""",""""versionDescription"""":""""Сведения о валютах по состоянию на 01.06.2020"""",""""version"""":2,""""fileUrl"""":""""https://dl03.1c.ru/public/classifier/download/b41e13ae-a3e3-11ea-80f5-0050569f1015"""",""""fileSize"""":24109,""""hashSum"""":""""9CzW1kOCzFmojn1rg0Chqg==""""},{""""classifierNick"""":""""CentralBankRefinancingRate"""",""""classifierName"""":""""Ставка рефинансирования ЦБ"""",""""versionDescription"""":""""Изменение ставки рефинансирования (ключевой ставки) с 27.07.2020 в соответствии с Информацией Банка России от 24.07.2020."""",""""version"""":14,""""fileUrl"""":""""https://dl03.1c.ru/public/classifier/download/d9ecbdfc-cdb2-11ea-80f7-0050569f1015"""",""""fileSize"""":6599,""""hashSum"""":""""li/QL1zEA2isdEBOBBDguA==""""},{""""classifierNick"""":""""InsurancePaymentPercentagesR2"""",""""classifierName"""":""""Тарифы страховых взносов"""",""""versionDescription"""":""""Обновлены тарифы страховых взносов в соответствии с Федеральным законом от 31.07.2020 № 265-ФЗ."""",""""version"""":12,""""fileUrl"""":""""https://dl03.1c.ru/public/classifier/download/5f2f1bf4-0359-11eb-80f9-0050569f1015"""",""""fileSize"""":43878,""""hashSum"""":""""qG0TLoSjHf760lrvDUu/xA==""""},{""""classifierNick"""":""""MaxInsurancePaymentBasis"""",""""classifierName"""":""""Предельная величина базы страховых взносов"""",""""versionDescription"""":""""Постановление Правительства РФ от 26.11.2020 № 1935"""",""""version"""":5,""""fileUrl"""":""""https://dl03.1c.ru/public/classifier/download/f963e789-33b4-11eb-80fa-0050569f1015"""",""""fileSize"""":4067,""""hashSum"""":""""UvUg80Ot5DjmdcZ4eihSAQ==""""},{""""classifierNick"""":""""MinMonthlyWage"""",""""classifierName"""":""""Минимальная оплата труда РФ"""",""""versionDescription"""":""""В соответствии с Федеральным законом \""""О внесении изменений в отдельные законодательные акты Российской Федерации\"""" минимальный размер оплаты труда с 1 января 2021 года установлен в сумме 12792 рублей в месяц."""",""""version"""":6,""""fileUrl"""":""""https://dl03.1c.ru/public/classifier/download/82ceae1b-45b8-11eb-80fa-0050569f1015"""",""""fileSize"""":3718,""""hashSum"""":""""lzJIyURtb1/wv5SgcC0Kaw==""""},{""""classifierNick"""":""""Calendars20"""",""""classifierName"""":""""Календари"""",""""versionDescription"""":""""1. Уточнена дата праздничного дня «Сагаалган» 13 февраля 2021 года вместо 12 февраля 2021 года для Республики Бурятия, Республики Калмыкия, Республики Тыва, Забайкальского края и Усть-Ордынского Бурятского округа Иркутской области.\n\n2. Добавлены даты праздничных дней Курбан-Байрам 20 июля 2021 года и День поминовения усопших (Радоница) 11 мая 2021 года в Республике Адыгея."""",""""version"""":18,""""fileUrl"""":""""https://dl03.1c.ru/public/classifier/download/1cecd672-5966-11eb-80fa-86643b3f0aba"""",""""fileSize"""":115218,""""hashSum"""":""""7Qoi30QlTNeW8HCb7xcVCg==""""},{""""classifierNick"""":""""Banks"""",""""classifierName"""":""""Справочник по кредитным организациям"""",""""versionDescription"""":""""Сведения о кредитных организациях по состоянию на 17.01.2021*\n\n——\n* Не содержит территориальных отделений Федерального казначейства (ТОФК). Для соответствия 479-ФЗ от 27.12.2019 «О внесении изменений в Бюджетный кодекс Российской Федерации в части казначейского обслуживания и системы казначейских платежей» необходимо обновить версию программы и перейти на загрузку классификатора «Справочник БИК»."""",""""version"""":677,""""fileUrl"""":""""https://dl03.1c.ru/public/classifier/download/742655b8-5995-11eb-80fa-86643b3f0aba"""",""""fileSize"""":512094,""""hashSum"""":""""f9LNnQOixRjD+YihIN833g==""""},{""""classifierNick"""":""""MaxMonthlyInsurancePayout"""",""""classifierName"""":""""Максимальный размер ежемесячной страховой выплаты"""",""""versionDescription"""":""""В соответствии со статьей 12 Федерального закона от 24.07.1998 № 125-ФЗ проиндексирован размер выплаты с 1 февраля 2021 года."""",""""version"""":6,""""fileUrl"""":""""https://dl03.1c.ru/public/classifier/download/c78820d2-5a3d-11eb-80fa-86643b3f0aba"""",""""fileSize"""":2518,""""hashSum"""":""""wRE/H/yorKwW2bXcVVhMfw==""""},{""""classifierNick"""":""""ChildAndDeathBenefits"""",""""classifierName"""":""""Размеры государственных пособий"""",""""versionDescription"""":""""В соответствии с Федеральным законом от 06.04.2015 № 68-ФЗ с 1 февраля 2021 года проиндексированы государственные пособия."""",""""version"""":6,""""fileUrl"""":""""https://dl03.1c.ru/public/classifier/download/57dc8ef2-5a4e-11eb-80fa-86643b3f0aba"""",""""fileSize"""":9966,""""hashSum"""":""""OBNaHX0l6zEBrTc9voiujQ=="",0,
+                {""U""},"""",1,1,0,459,0,
+                {2,1,1,2,1}
+                }";
+
+            using var mStream = new MemoryStream(Encoding.UTF8.GetBytes(s));
+            using var stream = new StreamReader(mStream);
+            var reader = new BracketsListReader(stream);
+
+            var item = reader.NextNodeAsStringBuilder();
+
             // Act
-            var node = BracketsParser.ParseBlock(strBuilder);
+            var node = BracketsParser.ParseBlock(item);
 
             // Assert
-            //Assert.Equal(19, index);
+            Assert.Equal(19, node.Count);
         }
     }
 }
