@@ -84,7 +84,6 @@ namespace OneSTools.BracketsFile
                 if (currentChar == -1)
                     break;
 
-                // Check if the line is a beginning of the item
                 if (!started && currentChar == '{')
                     started = true;
 
@@ -111,16 +110,15 @@ namespace OneSTools.BracketsFile
                     break;
             }
 
+            if (endIndex != -1) 
+                return itemData;
+
             // if there is no end index than set stream's position to the beginning of the item and returns empty value
-            if (endIndex == -1)
-            {
-                var itemDataBytesLength = _stream.CurrentEncoding.GetBytes(itemData.ToString()).Length;
-                _stream.SetPosition(_stream.GetPosition() - itemDataBytesLength);
+            var itemDataBytesLength = _stream.CurrentEncoding.GetBytes(itemData.ToString()).Length;
+            _stream.SetPosition(_stream.GetPosition() - itemDataBytesLength);
 
-                return itemData.Clear();
-            }
+            return itemData.Clear();
 
-            return itemData;
         }
 
         protected virtual void Dispose(bool disposing)

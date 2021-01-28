@@ -115,8 +115,7 @@ namespace OneSTools.BracketsFile
         /// <param name="index"></param>
         /// <param name="quotes"></param>
         /// <param name="brackets"></param>
-        /// <param name="textValueStartIndex"></param>
-        /// <param name="textValueStarted"></param>
+        /// <param name="textValueBrackets"></param>
         /// <returns></returns>
         internal static int GetNodeEndIndex(StringBuilder text, ref int index, ref int quotes, ref int brackets, ref int textValueBrackets)
         {
@@ -186,18 +185,20 @@ namespace OneSTools.BracketsFile
         /// </summary>
         /// <param name="text"></param>
         /// <param name="startIndex"></param>
+        /// <param name="textValueBrackets"></param>
         /// <returns></returns>
         public static int GetTextValueEndIndex(StringBuilder text, int startIndex, ref int textValueBrackets)
         {
             for (var i = startIndex; i < text.Length; i++)
             {
+                var prevChar = i > 0 ? text[i - 1] : '\0';
                 var currentChar = text[i];
                 var nextChar = text.Length > i + 1 ? text[i + 1] : '\0';
 
                 if (currentChar == '"')
                     textValueBrackets++;
 
-                if (currentChar == '"' && (nextChar == ',' || nextChar == '}' || nextChar == '\0') && (textValueBrackets == 0 || textValueBrackets % 2 == 0))
+                if ((prevChar == '"' && currentChar == ',' || currentChar == '"' && (nextChar == ',' || nextChar == '}')) && (textValueBrackets == 0 || textValueBrackets % 2 == 0))
                     return i;
             }
 
