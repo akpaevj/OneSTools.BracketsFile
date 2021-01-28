@@ -15,7 +15,7 @@
     <RepositoryUrl>https://github.com/akpaevj/OneSTools.BracketsFile</RepositoryUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
-    <Version>2.1.8</Version>
+    <Version>2.1.9</Version>
     <PackageIcon>onestools_icon_nuget.png</PackageIcon>
   </PropertyGroup>
 

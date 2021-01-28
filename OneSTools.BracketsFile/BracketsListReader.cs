@@ -79,7 +79,7 @@ namespace OneSTools.BracketsFile
 
             while (!EndOfStream)
             {
-                var currentChar = (char)_stream.Read();
+                var currentChar = (char) _stream.Read();
 
                 if (currentChar == -1)
                     break;
@@ -99,7 +99,7 @@ namespace OneSTools.BracketsFile
                     if (textValueEndIndex == -1)
                         continue;
 
-                    index = textValueEndIndex + 1;
+                    index = textValueEndIndex;
                     textValueBrackets = 0;
                     continue;
                 }
