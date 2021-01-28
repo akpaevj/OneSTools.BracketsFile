@@ -198,7 +198,7 @@ namespace OneSTools.BracketsFile
                 if (currentChar == '"')
                     textValueBrackets++;
 
-                if ((prevChar == '"' && currentChar == ',' || currentChar == '"' && (nextChar == ',' || nextChar == '}')) && (textValueBrackets == 0 || textValueBrackets % 2 == 0))
+                if ((prevChar == '"' && (currentChar == ',' || currentChar == '}') || currentChar == '"' && (nextChar == ',' || nextChar == '}')) && (textValueBrackets == 0 || textValueBrackets % 2 == 0))
                     return i;
             }
 
