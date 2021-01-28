@@ -75,8 +75,7 @@ namespace OneSTools.BracketsFile
             var quotes = 0;
             var brackets = 0;
             var endIndex = -1;
-            var textValueStartIndex = 0;
-            var textValueStarted = false;
+            var textValueBrackets = 0;
 
             while (!EndOfStream)
             {
@@ -94,19 +93,19 @@ namespace OneSTools.BracketsFile
                 else
                     continue;
 
-                if (textValueStarted)
+                if (textValueBrackets > 0)
                 {
-                    if (BracketsParser.GetTextValueEndIndex(itemData, textValueStartIndex) != -1)
-                    {
-                        index = itemData.Length - 1;
-                        textValueStartIndex = -1;
-                        textValueStarted = false;
-                    }
-                    else
+                    var textValueEndIndex = BracketsParser.GetTextValueEndIndex(itemData, itemData.Length - 1, ref textValueBrackets);
+
+                    if (textValueEndIndex == -1)
                         continue;
+
+                    index = textValueEndIndex + 1;
+                    textValueBrackets = 0;
+                    continue;
                 }
-                else
-                    endIndex = BracketsParser.GetNodeEndIndex(itemData, ref index, ref quotes, ref brackets, ref textValueStartIndex, ref textValueStarted);
+
+                endIndex = BracketsParser.GetNodeEndIndex(itemData, ref index, ref quotes, ref brackets, ref textValueBrackets);
 
                 if (endIndex != -1)
                     break;
